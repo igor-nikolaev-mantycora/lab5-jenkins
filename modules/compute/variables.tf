@@ -2,17 +2,17 @@
 #===============================
 variable "region" {
   type    = string
-  default = "us-east-1"
+  default = "ap-southeast-2"
 }
 
 variable "ssh_key_public" {
   type    = string
-  default = "C:\\Users\\wessa\\.ssh\\id_rsa.pub"
+  default = "/Users/mantycora/.ssh/yorkulabs.pub"
 }
 
 variable "ssh_key_private" {
   type    = string
-  default = "C:\\Users\\wessa\\.ssh\\id_rsa"
+  default = "/Users/mantycora/.ssh/yorkulabs"
 }
 
 variable "subnet_ips" {}

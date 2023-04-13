@@ -1,0 +1,79 @@
+---
+- name: Jenkins and Docker
+  hosts: localhost
+  remote_user: ec2-user
+  become: true
+  
+  tasks:
+
+    - name: install dependencies
+      yum:
+        name: "{{ package }} "
+        state: present
+      vars:
+        package:
+        - wget
+        - java-1.8.0-openjdk-devel
+        - git
+        - yum-utils
+
+    - name: Download Jenkins Repo
+      get_url:
+        url: https://pkg.jenkins.io/redhat-stable/jenkins.repo
+        dest: /etc/yum.repos.d/jenkins.repo
+
+    - name: Import Jenkins Repo GPG key
+      rpm_key:
+        state: present
+        key: https://pkg.jenkins.io/redhat/jenkins.io.key
+
+    - name: Install Jenkins
+      yum:
+        name: jenkins
+        state: present
+
+    - name: Start and Enable Jenkins
+      systemd:
+        name: jenkins
+        state: started
+        enabled: true
+
+    - name: Sleep for 30 seconds and continue with play
+      wait_for: timeout=30
+
+    - name: Get init password Jenkins
+      shell: cat /var/lib/jenkins/secrets/initialAdminPassword
+      changed_when: false
+      register: result
+
+    - name: Print init password Jenkins
+      debug:
+        var: result.stdout
+
+    - name: Install Docker
+      package:
+        name: "docker-20.10.4-1.amzn2.x86_64"
+        state: present
+
+    - name: Ensure group "docker" exists
+      ansible.builtin.group:
+        name: docker
+        state: present
+
+    - name: Add jenkins user to docker group
+      ansible.builtin.user:
+        name: jenkins
+        group: docker
+        append: yes
+
+    - name: Start Docker service
+      service:
+        name: docker
+        state: started
+        enabled: true
+
+    - name: Change permissions of docker.sock
+      file:
+        path: "/var/run/docker.sock"
+        state: file
+        mode: "777"

@@ -47,10 +47,20 @@ resource "aws_instance" "jenkins" {
   provisioner "remote-exec" {
     inline = [
       "sudo yum update -y && sudo amazon-linux-extras install ansible2 -y",
+      "sudo yum upgrade -y",
+      "sudo amazon-linux-extras install java-openjdk11 -y",
+      "sudo yum install java-11-amazon-corretto -y",
       "sudo yum install ansible",
       "sleep 90s",
       "sudo amazon-linux-extras install epel -y",
       "sudo yum-config-manager --enable epel",
+      "sudo yum update -y && sudo yum upgrade -y",
+      "sudo yum install jenkins -y",
+      "sudo wget -O /etc/yum.repos.d/jenkins.repo http://pkg.jenkins-ci.org/redhat/jenkins.repo",
+      "sudo rpm --import https://pkg.jenkins.io/redhat/jenkins.io.key",
+      "sudo yum install jenkins -y",
+      "sleep 90s",
+      "sudo service jenkins start",
       "ansible-playbook install_jenkins_and_docker.yaml"
     ]
  }
